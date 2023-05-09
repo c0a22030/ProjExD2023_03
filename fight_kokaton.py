@@ -102,6 +102,7 @@ class Bomb:
     """
     _colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
     _dires = [-1, +1]
+
     def __init__(self):
         """
         爆弾円Surfaceを生成する
@@ -131,8 +132,14 @@ class Bomb:
 
 class Explosion:
     """
+    爆発に関するクラス
     """
     def __init__(self, bomb: Bomb, life: int):
+        """
+        爆発Surfaceを生成する
+        引数1 bomb：爆弾Surface
+        引数2 life：爆発時間
+        """
         img = pg.image.load(f"ex03/fig/explosion.gif")
         self._imgs = [img, pg.transform.flip(img, True, True)]
         self._img = self._imgs[0]
@@ -141,6 +148,8 @@ class Explosion:
 
     def update(self, screen: pg.Surface):
         """
+        爆発時間lifeによってExplosionを表示
+        引数 screen：画面Surface
         """
         self._life -= 1
         self._img = self._imgs[self._life//10%2]
