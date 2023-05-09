@@ -101,7 +101,7 @@ class Bomb:
     爆弾に関するクラス
     """
     _colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
-    _dires = [-1, 0, +1]
+    _dires = [-1, +1]
     def __init__(self):
         """
         爆弾円Surfaceを生成する
@@ -127,6 +127,28 @@ class Bomb:
             self._vy *= -1
         self._rct.move_ip(self._vx, self._vy)
         screen.blit(self._img, self._rct)
+
+
+class Explosion:
+    """
+    """
+    def __init__(self, bomb: Bomb, life: int):
+        img = pg.image.load(f"ex03/fig/explosion.gif")
+        self._imgs = [img, pg.transform.flip(img, True, True)]
+        self._img = self._imgs[0]
+        self._rct = self._img.get_rect(center=bomb._rct.center)
+        self._life = life
+
+    def update(self, screen: pg.Surface):
+        """
+        """
+        self._life -= 1
+        self._img = self._imgs[self._life//10%2]
+        screen.blit(self._img, self._rct)
+
+    def get_life(self):
+        return self._life
+        
 
 
 class Beam:
@@ -157,7 +179,8 @@ def main():
 
     bird = Bird(3, (900, 400))
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]
-    beam = None  
+    beam = None
+    exps: list[Explosion] = list()
 
     tmr = 0
     while True:
@@ -178,18 +201,25 @@ def main():
                 time.sleep(1)
                 return
 
-        key_lst = pg.key.get_pressed()
-        bird.update(key_lst, screen)
+       
         
         if beam is not None:  # ビームが存在しているとき
             beam.update(screen)
             for i, bomb in enumerate(bombs):
                 if beam._rct.colliderect(bomb._rct):
+                    exps.append(Explosion(bomb, 1200))
                     beam = None
                     del bombs[i]
                     bird.change_img(6, screen)
                     break
+                    
+        for i, exp in enumerate(exps):
+            exp.update(screen)
+            if exp.get_life() <= 0:
+                del exps[i]
 
+        key_lst = pg.key.get_pressed()
+        bird.update(key_lst, screen)
         pg.display.update()
         clock.tick(1000)
 
