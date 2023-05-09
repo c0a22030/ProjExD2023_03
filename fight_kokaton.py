@@ -49,6 +49,19 @@ class Bird:
             True, 
             False
         )
+        imgs0 = pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"), 0, 2.0)  # 左向き、２倍
+        imgs1 = pg.transform.flip(imgs0, True, False)  # 右向き２倍
+        self._imgs = {
+            (+1, 0): imgs1,  # 右
+            (+1,-1): pg.transform.rotozoom(imgs1, 45, 1.0),  # 右上
+            (0, -1): pg.transform.rotozoom(imgs1, 90, 1.0),  # 上
+            (-1, -1): pg.transform.rotozoom(imgs0, -45, 1.0),  # 左上
+            (-1, 0): imgs0,  # 左
+            (-1,+1): pg.transform.rotozoom(imgs0, 45, 1.0),  # 左下
+            (0, +1): pg.transform.rotozoom(imgs1, -90, 1.0),  # 下
+            (+1, +1): pg.transform.rotozoom(imgs1, -45, 1.0),  # 右下
+        }
+        self._img = self._imgs[(+1, 0)]  # デフォルトで右
         self._rct = self._img.get_rect()
         self._rct.center = xy
 
@@ -67,13 +80,18 @@ class Bird:
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        sum_mv = [0, 0]
         for k, mv in __class__._delta.items():
             if key_lst[k]:
                 self._rct.move_ip(mv)
+                sum_mv[0] += mv[0]  # 横方向合計
+                sum_mv[1] += mv[1]  # 縦方向合計
         if check_bound(screen.get_rect(), self._rct) != (True, True):
             for k, mv in __class__._delta.items():
                 if key_lst[k]:
                     self._rct.move_ip(-mv[0], -mv[1])
+        if not(sum_mv[0] == 0 and sum_mv[1] == 0):
+            self._img = self._imgs[tuple(sum_mv)]  # 押されたキーの合計値
         screen.blit(self._img, self._rct)
 
 
@@ -115,7 +133,7 @@ class Beam:
     def __init__(self, bird: Bird):
         self._img = pg.transform.rotozoom(pg.image.load(f"ex03/fig/beam.png"), 0, 2.0)  # 画像Surface
         self._rct = self._img.get_rect()  # 画像Surfaceに対応したrect
-        self._rct.centerx = bird._rct.centerx + bird._rct.width # こうかとんの中心座標＋てょっと右
+        self._rct.left = bird._rct.right # こうかとんの右側にビームの左側を合わせる
         self._rct.centery = bird._rct.centery
         self._vx, self._vy = +1, 0
 
