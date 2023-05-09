@@ -182,6 +182,7 @@ def main():
         bird.update(key_lst, screen)
         
         if beam is not None:  # ビームが存在しているとき
+            beam.update(screen)
             for i, bomb in enumerate(bombs):
                 if beam._rct.colliderect(bomb._rct):
                     beam = None
